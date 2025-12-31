@@ -6,6 +6,9 @@ on:
       - completed
   workflow_dispatch:
 
+  schedule:
+    - cron: "*/15 * * * *"
+
 
 jobs:
   run_cross_browser_tests:
