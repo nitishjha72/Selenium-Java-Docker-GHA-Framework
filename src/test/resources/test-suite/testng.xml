@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
+<suite name="Selenium Java Docker GHA Automation" parallel="tests" thread-count="3">
+
+<!--    <parameter name="TEST_CATEGORY" value="REGRESSION"/>-->
+
+    <listeners>
+        <listener class-name="com.nitish.qa.listeners.TestListenerClass"></listener>
+        <listener class-name="com.nitish.qa.listeners.AnnotationTransformation"></listener>
+        <listener class-name="com.nitish.qa.listeners.MethodInterceptor"></listener>
+    </listeners>
+
+    <test name="User Registration Test" verbose="2">
+        <classes>
+            <class name="com.nitish.qa.tests.UserRegistrationTest"></class>
+        </classes>
+    </test>
+
+    <test name="Flight booking test" verbose="2">
+        <classes>
+            <class name="com.nitish.qa.tests.FlightReservationTest"></class>
+        </classes>
+    </test>
+
+</suite>

@@ -1,0 +1,59 @@
+name: trigger_tests
+on:
+  workflow_run:
+    workflows: ["build_and_deploy"]
+    types:
+      - completed
+  workflow_dispatch:
+
+
+jobs:
+  run_cross_browser_tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        browser: [chrome, firefox]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Install Docker Compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Start Grid
+        run: docker-compose -f grid.yaml up --scale ${{ matrix.browser }}=2 -d
+
+      - name: Run Tests
+        run: |
+          docker-compose -f test-suite.yaml pull
+          BROWSER=${{ matrix.browser }} docker-compose -f test-suite.yaml up
+          if [ -f testng-test-output/testng-failed.xml ] || [ -f test-output/testng-failed.xml ]; then
+            echo "Failed tests found"
+            exit 1
+          fi
+
+      - name: Archive test reports
+        if: always()
+        run: |
+          docker-compose -f grid.yaml down
+          docker-compose -f test-suite.yaml down
+          mkdir -p artifacts
+          cp -r extent-reports/* artifacts/
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports-${{ matrix.browser }}
+          path: artifacts/
+          retention-days: 7

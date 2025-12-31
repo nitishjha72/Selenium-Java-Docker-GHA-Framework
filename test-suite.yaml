@@ -1,0 +1,11 @@
+version: "3"
+services:
+  flight_booking_test:
+    image: nitishjha72/selenium-java-docker-gha
+    environment:
+      - BROWSER=${BROWSER}
+      - TEST_CATEGORY=REGRESSION
+      - THREAD_COUNT=3
+      - GRID_URL=http://hub:4444/wd/hub
+    volumes:
+      - ./extent-reports:/home/nitish-selenium-docker/extent-reports
